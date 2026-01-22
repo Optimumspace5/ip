@@ -10,7 +10,7 @@ public class Ace {
         System.out.println("What can i do for you?");
 
         Scanner scanner = new Scanner(System.in);
-        String[] list = new String[100];
+        Task[] list = new Task[100];
         int index = 0;
         while (true) {
             String userInput = scanner.nextLine();
@@ -22,11 +22,50 @@ public class Ace {
 
             if (userInput.equals("list")) {
                 for (int i = 0; i < index; i++) {
-                    System.out.println(i+1 + ". " + list[i]);
+                    System.out.println(i+1 + ". " + list[i].toString());
                 }
                 continue;
             }
-            list[index] = userInput;
+
+            if (userInput.startsWith("mark ")) {
+                try {
+                int taskNumber = Integer.parseInt(userInput.substring(5));
+                int taskIndex = taskNumber - 1;
+
+                if (taskIndex < 0 || taskIndex >=index) {
+                    System.out.println("Invalid task number.");
+                    continue;
+                }
+
+                list[taskIndex].markDone();
+                System.out.println("Nice! I've marked this task as done:");
+                System.out.println(list[taskIndex]);
+
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid task number.");
+                }
+                continue;
+            }
+
+            if (userInput.startsWith("unmark ")) {
+                try {
+                    int taskNumber = Integer.parseInt(userInput.substring(7));
+                    int taskIndex = taskNumber - 1;
+
+                    if (taskIndex < 0 || taskIndex >= index) {
+                        System.out.println("Invalid task number.");
+                        continue;
+                    }
+
+                    list[taskIndex].markNotDone();
+                    System.out.println("OK, I've marked this task as not done yet:");
+                    System.out.println(list[taskIndex]);
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid task number.");
+                }
+                continue;
+            }
+            list[index] = new Task(userInput);
             index++;
             System.out.println("added: " + userInput);
         }
