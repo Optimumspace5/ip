@@ -10,7 +10,8 @@ public class Ace {
         System.out.println("What can i do for you?");
 
         Scanner scanner = new Scanner(System.in);
-
+        String[] list = new String[100];
+        int index = 0;
         while (true) {
             String userInput = scanner.nextLine();
 
@@ -19,7 +20,15 @@ public class Ace {
                 break;
             }
 
-            System.out.println(userInput);
+            if (userInput.equals("list")) {
+                for (int i = 0; i < index; i++) {
+                    System.out.println(i+1 + ". " + list[i]);
+                }
+                continue;
+            }
+            list[index] = userInput;
+            index++;
+            System.out.println("added: " + userInput);
         }
     }
 }
