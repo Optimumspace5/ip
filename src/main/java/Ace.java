@@ -1,4 +1,9 @@
 import java.util.*;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 public class Ace {
     public static void main(String[] args) {
 
@@ -7,6 +12,40 @@ public class Ace {
 
         Scanner scanner = new Scanner(System.in);
         ArrayList<Task> list = new ArrayList<>();
+
+        ArrayList<String> savedLines = loadFromFile();
+        for (String line : savedLines) {
+            String[] parts = line.split(" \\| "); // type, done, desc
+            if (parts.length < 3) {
+                continue;
+            }
+
+            String type = parts[0];
+            String done = parts[1];
+
+            Task t;
+
+            if (type.equals("T")) {
+                if (parts.length < 3) continue;
+                t = new Todo(parts[2]);
+
+            } else if (type.equals("D")) {
+                if (parts.length < 4) continue;
+                t = new Deadline(parts[2], parts[3]);
+
+            } else if (type.equals("E")) {
+                if (parts.length < 5) continue;
+                t = new Event(parts[2], parts[3], parts[4]);
+
+            } else {
+                continue;
+            }
+
+            if (done.equals("1")) {
+                t.markDone();
+            }
+            list.add(t);
+        }
         while (true) {
             try {
                 String userInput = scanner.nextLine();
@@ -45,6 +84,7 @@ public class Ace {
                         }
 
                         Task removedTask = list.remove(taskIndex);
+                        saveToFile(list);
 
                         System.out.println("Noted. I've removed this task:");
                         System.out.println(removedTask);
@@ -59,6 +99,7 @@ public class Ace {
                 if (userInput.startsWith("todo ")) {
                     String description = userInput.substring(5);
                     list.add(new Todo(description));
+                    saveToFile(list);
                     System.out.println("Got it. I've added this task:");
                     System.out.println(list.get(list.size() - 1));
                     System.out.println("Now you have " + list.size() + " tasks in the list.");
@@ -74,6 +115,7 @@ public class Ace {
                     String by = parts[1];
 
                     list.add(new Deadline(description, by));
+                    saveToFile(list);
                     System.out.println("Got it. I've added this task:");
                     System.out.println(list.get(list.size() - 1));
                     System.out.println("Now you have " + list.size() + " tasks in the list.");
@@ -90,6 +132,7 @@ public class Ace {
                     String to = parts[2];
 
                     list.add(new Event(description, from, to));
+                    saveToFile(list);
                     System.out.println("Got it. I've added this task:");
                     System.out.println(list.get(list.size() - 1));
                     System.out.println("Now you have " + list.size() + " tasks in the list.");
@@ -106,6 +149,7 @@ public class Ace {
                         }
 
                         list.get(taskIndex).markDone();
+                        saveToFile(list);
                         System.out.println("Nice! I've marked this task as done:");
                         System.out.println(list.get(taskIndex));
 
@@ -125,6 +169,7 @@ public class Ace {
                         }
 
                         list.get(taskIndex).markNotDone();
+                        saveToFile(list);
                         System.out.println("OK, I've marked this task as not done yet:");
                         System.out.println(list.get(taskIndex));
                     } catch (NumberFormatException e) {
@@ -139,5 +184,47 @@ public class Ace {
                 System.out.println("Oops! " + e.getMessage());
             }
         }
+    }
+
+    private static void saveToFile(ArrayList<Task> list) {
+        try {
+            Path p = Paths.get("./data/duke.txt");
+
+            ArrayList<String> lines = new ArrayList<>();
+            for (Task t : list) {
+                String done = t.isDone() ? "1" : "0";
+
+                if (t instanceof Todo) {
+                    lines.add("T | " + done + " | " + t.getDescription());
+
+                } else if (t instanceof Deadline) {
+                    Deadline d = (Deadline) t;
+                    lines.add("D | " + done + " | " + d.getDescription() + " | " + d.getBy());
+
+                } else if (t instanceof Event) {
+                    Event e = (Event) t;
+                    lines.add("E | " + done + " | " + e.getDescription()
+                            + " | " + e.getFrom() + " | " + e.getTo());
+                }
+            }
+
+            Files.write(p, lines, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            System.out.println("Failed to save to ./data/duke.txt");
+        }
+    }
+
+    private static ArrayList<String> loadFromFile() {
+        ArrayList<String> lines = new ArrayList<>();
+        try {
+            Path p = Paths.get("./data/duke.txt");
+            if (!Files.exists(p)) {
+                return lines; // first run: no file
+            }
+            lines.addAll(Files.readAllLines(p, StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            System.out.println("Failed to load from ./data/duke.txt");
+        }
+        return lines;
     }
 }
