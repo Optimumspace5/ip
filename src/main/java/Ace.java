@@ -1,9 +1,12 @@
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
 public class Ace {
     public static void main(String[] args) {
 
@@ -31,7 +34,13 @@ public class Ace {
 
             } else if (type.equals("D")) {
                 if (parts.length < 4) continue;
-                t = new Deadline(parts[2], parts[3]);
+                LocalDate byDate;
+                try {
+                    byDate = LocalDate.parse(parts[3].trim());
+                } catch (DateTimeParseException e) {
+                    continue;
+                }
+                t = new Deadline(parts[2], byDate);
 
             } else if (type.equals("E")) {
                 if (parts.length < 5) continue;
@@ -112,9 +121,16 @@ public class Ace {
                         throw new AceException("Invalid deadline format. Use: deadline <desc> /by <time>");
                     }
                     String description = parts[0];
-                    String by = parts[1];
+                    String byRaw = parts[1].trim();
 
-                    list.add(new Deadline(description, by));
+                    LocalDate byDate;
+                    try {
+                        byDate = LocalDate.parse(byRaw);
+                    } catch (DateTimeParseException e) {
+                        throw new AceException("Invalid date format. Use: yyyy-MM-dd");
+                    }
+
+                    list.add(new Deadline(description, byDate));
                     saveToFile(list);
                     System.out.println("Got it. I've added this task:");
                     System.out.println(list.get(list.size() - 1));
