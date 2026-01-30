@@ -62,49 +62,11 @@ public class Ace {
                     continue;
                 }
 
-                if (userInput.startsWith("todo ")) {
-                    Task t = new Todo(userInput.substring(5));
-                    tasks.add(t);
+                Task newTask = Parser.parseAddCommand(userInput);
+                if (newTask != null) {
+                    tasks.add(newTask);
                     storage.save(tasks.getTasks());
-                    ui.showAdded(t, tasks.size());
-                    continue;
-                }
-
-                if (userInput.startsWith("deadline ")) {
-                    String[] parts = userInput.substring(9).split(" /by ", 2);
-                    if (parts.length < 2) {
-                        throw new AceException("Invalid deadline format. Use: deadline <desc> /by <time>");
-                    }
-                    String description = parts[0];
-                    String byRaw = parts[1].trim();
-
-                    LocalDate byDate;
-                    try {
-                        byDate = LocalDate.parse(byRaw);
-                    } catch (DateTimeParseException e) {
-                        throw new AceException("Invalid date format. Use: yyyy-MM-dd");
-                    }
-
-                    Task t = new Deadline(description, byDate);
-                    tasks.add(t);
-                    storage.save(tasks.getTasks());
-                    ui.showAdded(t, tasks.size());
-                    continue;
-                }
-
-                if (userInput.startsWith("event ")) {
-                    String[] parts = userInput.substring(6).split(" /from | /to ");
-                    if (parts.length < 3) {
-                        throw new AceException("Invalid event format. Use: event <desc> /from <start> /to <end>");
-                    }
-                    String description = parts[0];
-                    String from = parts[1];
-                    String to = parts[2];
-
-                    Task t = new Event(description, from, to);
-                    tasks.add(t);
-                    storage.save(tasks.getTasks());
-                    ui.showAdded(t, tasks.size());
+                    ui.showAdded(newTask, tasks.size());
                     continue;
                 }
 
