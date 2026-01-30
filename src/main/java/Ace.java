@@ -14,7 +14,7 @@ public class Ace {
         System.out.println("What can i do for you?");
 
         Scanner scanner = new Scanner(System.in);
-        ArrayList<Task> list = new ArrayList<>();
+        TaskList tasks = new TaskList();
 
         ArrayList<String> savedLines = loadFromFile();
         for (String line : savedLines) {
@@ -53,7 +53,7 @@ public class Ace {
             if (done.equals("1")) {
                 t.markDone();
             }
-            list.add(t);
+            tasks.add(t);
         }
         while (true) {
             try {
@@ -78,8 +78,8 @@ public class Ace {
 
                 if (userInput.equals("list")) {
                     System.out.println("Here are the tasks in your list:");
-                    for (int i = 0; i < list.size(); i++) {
-                        System.out.println(i + 1 + ". " + list.get(i).toString());
+                    for (int i = 0; i < tasks.size(); i++) {
+                        System.out.println(i + 1 + ". " + tasks.get(i));
                     }
                     continue;
                 }
@@ -88,16 +88,16 @@ public class Ace {
                         int taskNumber = Integer.parseInt(userInput.substring(7));
                         int taskIndex = taskNumber - 1;
 
-                        if (taskIndex < 0 || taskIndex >= list.size()) {
+                        if (taskIndex < 0 || taskIndex >= tasks.size()) {
                             throw new AceException("Invalid task number.");
                         }
 
-                        Task removedTask = list.remove(taskIndex);
-                        saveToFile(list);
+                        Task removedTask = tasks.delete(taskIndex);
+                        saveToFile(tasks.getTasks());
 
                         System.out.println("Noted. I've removed this task:");
                         System.out.println(removedTask);
-                        System.out.println("Now you have " + list.size() + " tasks in the list.");
+                        System.out.println("Now you have " + tasks.size() + " tasks in the list.");
 
                     } catch (NumberFormatException e) {
                         throw new AceException("Invalid task number.");
@@ -106,12 +106,12 @@ public class Ace {
                 }
 
                 if (userInput.startsWith("todo ")) {
-                    String description = userInput.substring(5);
-                    list.add(new Todo(description));
-                    saveToFile(list);
+                    Task t = new Todo(userInput.substring(5));
+                    tasks.add(t);
+                    saveToFile(tasks.getTasks());
                     System.out.println("Got it. I've added this task:");
-                    System.out.println(list.get(list.size() - 1));
-                    System.out.println("Now you have " + list.size() + " tasks in the list.");
+                    System.out.println(t);
+                    System.out.println("Now you have " + tasks.size() + " tasks in the list.");
                     continue;
                 }
 
@@ -130,11 +130,12 @@ public class Ace {
                         throw new AceException("Invalid date format. Use: yyyy-MM-dd");
                     }
 
-                    list.add(new Deadline(description, byDate));
-                    saveToFile(list);
+                    Task t = new Deadline(parts[0], byDate);
+                    tasks.add(t);
+                    saveToFile(tasks.getTasks());
                     System.out.println("Got it. I've added this task:");
-                    System.out.println(list.get(list.size() - 1));
-                    System.out.println("Now you have " + list.size() + " tasks in the list.");
+                    System.out.println(t);
+                    System.out.println("Now you have " + tasks.size() + " tasks in the list.");
                     continue;
                 }
 
@@ -147,11 +148,12 @@ public class Ace {
                     String from = parts[1];
                     String to = parts[2];
 
-                    list.add(new Event(description, from, to));
-                    saveToFile(list);
+                    Task t = new Event(description, from, to);
+                    tasks.add(t);
+                    saveToFile(tasks.getTasks());
                     System.out.println("Got it. I've added this task:");
-                    System.out.println(list.get(list.size() - 1));
-                    System.out.println("Now you have " + list.size() + " tasks in the list.");
+                    System.out.println(t);
+                    System.out.println("Now you have " + tasks.size() + " tasks in the list.");
                     continue;
                 }
 
@@ -160,14 +162,14 @@ public class Ace {
                         int taskNumber = Integer.parseInt(userInput.substring(5));
                         int taskIndex = taskNumber - 1;
 
-                        if (taskIndex < 0 || taskIndex >= list.size()) {
+                        if (taskIndex < 0 || taskIndex >= tasks.size()) {
                             throw new AceException("Invalid task number.");
                         }
 
-                        list.get(taskIndex).markDone();
-                        saveToFile(list);
+                        tasks.get(taskIndex).markDone();
+                        saveToFile(tasks.getTasks());
                         System.out.println("Nice! I've marked this task as done:");
-                        System.out.println(list.get(taskIndex));
+                        System.out.println(tasks.get(taskIndex));
 
                     } catch (NumberFormatException e) {
                         throw new AceException("Invalid task number.");
@@ -180,14 +182,14 @@ public class Ace {
                         int taskNumber = Integer.parseInt(userInput.substring(7));
                         int taskIndex = taskNumber - 1;
 
-                        if (taskIndex < 0 || taskIndex >= list.size()) {
+                        if (taskIndex < 0 || taskIndex >= tasks.size()) {
                             throw new AceException("Invalid task number.");
                         }
 
-                        list.get(taskIndex).markNotDone();
-                        saveToFile(list);
+                        tasks.get(taskIndex).markNotDone();
+                        saveToFile(tasks.getTasks());
                         System.out.println("OK, I've marked this task as not done yet:");
-                        System.out.println(list.get(taskIndex));
+                        System.out.println(tasks.get(taskIndex));
                     } catch (NumberFormatException e) {
                         throw new AceException("Invalid task number.");
                     }

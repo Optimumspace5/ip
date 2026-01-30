@@ -1,4 +1,5 @@
-T | 0 | return book
-E | 0 | meeting | Mon | Tue
-D | 0 | return book | 2019-10-15
-D | 0 | return book | 2019-10-15
+T | 0 | read book
+E | 1 | meeting | Mon | Tue
+T | 0 | wash car
+D | 0 | pay bills | 2020-01-02
+E | 0 | cs2103 | Wed | Fri
