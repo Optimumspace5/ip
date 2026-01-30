@@ -43,22 +43,11 @@ public class Ace {
                 }
 
                 if (userInput.startsWith("delete ")) {
-                    try {
-                        int taskNumber = Integer.parseInt(userInput.substring(7));
-                        int taskIndex = taskNumber - 1;
+                    int taskIndex = Parser.parseDeleteIndex(userInput, tasks);
 
-                        if (taskIndex < 0 || taskIndex >= tasks.size()) {
-                            throw new AceException("Invalid task number.");
-                        }
-
-                        Task removedTask = tasks.delete(taskIndex);
-                        storage.save(tasks.getTasks());
-
-                        ui.showDeleted(removedTask, tasks.size());
-
-                    } catch (NumberFormatException e) {
-                        throw new AceException("Invalid task number.");
-                    }
+                    Task removedTask = tasks.delete(taskIndex);
+                    storage.save(tasks.getTasks());
+                    ui.showDeleted(removedTask, tasks.size());
                     continue;
                 }
 
@@ -71,39 +60,20 @@ public class Ace {
                 }
 
                 if (userInput.startsWith("mark ")) {
-                    try {
-                        int taskNumber = Integer.parseInt(userInput.substring(5));
-                        int taskIndex = taskNumber - 1;
+                    int taskIndex = Parser.parseMarkIndex(userInput, tasks);
 
-                        if (taskIndex < 0 || taskIndex >= tasks.size()) {
-                            throw new AceException("Invalid task number.");
-                        }
-
-                        tasks.get(taskIndex).markDone();
-                        storage.save(tasks.getTasks());
-                        ui.showMarked(tasks.get(taskIndex));
-
-                    } catch (NumberFormatException e) {
-                        throw new AceException("Invalid task number.");
-                    }
+                    tasks.get(taskIndex).markDone();
+                    storage.save(tasks.getTasks());
+                    ui.showMarked(tasks.get(taskIndex));
                     continue;
                 }
 
                 if (userInput.startsWith("unmark ")) {
-                    try {
-                        int taskNumber = Integer.parseInt(userInput.substring(7));
-                        int taskIndex = taskNumber - 1;
+                    int taskIndex = Parser.parseUnmarkIndex(userInput, tasks);
 
-                        if (taskIndex < 0 || taskIndex >= tasks.size()) {
-                            throw new AceException("Invalid task number.");
-                        }
-
-                        tasks.get(taskIndex).markNotDone();
-                        storage.save(tasks.getTasks());
-                        ui.showUnmarked(tasks.get(taskIndex));
-                    } catch (NumberFormatException e) {
-                        throw new AceException("Invalid task number.");
-                    }
+                    tasks.get(taskIndex).markNotDone();
+                    storage.save(tasks.getTasks());
+                    ui.showUnmarked(tasks.get(taskIndex));
                     continue;
                 }
 

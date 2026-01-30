@@ -38,5 +38,39 @@ public class Parser {
 
         return null; // not an add command
     }
+    public static int parseDeleteIndex(String input, TaskList tasks) throws AceException {
+        return parseIndex(input, "delete", tasks);
+    }
+
+    public static int parseMarkIndex(String input, TaskList tasks) throws AceException {
+        return parseIndex(input, "mark", tasks);
+    }
+
+    public static int parseUnmarkIndex(String input, TaskList tasks) throws AceException {
+        return parseIndex(input, "unmark", tasks);
+    }
+
+    private static int parseIndex(String input, String commandWord, TaskList tasks) throws AceException {
+        String prefix = commandWord + " ";
+        if (!input.startsWith(prefix)) {
+            throw new AceException("I don't know what that means.");
+        }
+
+        String numberPart = input.substring(prefix.length()).trim();
+
+        int taskNumber;
+        try {
+            taskNumber = Integer.parseInt(numberPart);
+        } catch (NumberFormatException e) {
+            throw new AceException("Invalid task number.");
+        }
+
+        int index = taskNumber - 1; // 0-based
+        if (index < 0 || index >= tasks.size()) {
+            throw new AceException("Invalid task number.");
+        }
+
+        return index;
+    }
 }
 

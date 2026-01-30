@@ -1,5 +1,2 @@
-D | 0 | return book | 2025-12-01
-E | 0 | exam | 2pm | 4pm
 T | 0 | a
-D | 0 | b | 2025-12-01
-E | 0 | c | Mon | Tue
+T | 0 | c
