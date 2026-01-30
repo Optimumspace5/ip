@@ -1,11 +1,6 @@
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.*;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class Ace {
     public static void main(String[] args) {
@@ -16,45 +11,13 @@ public class Ace {
         Scanner scanner = new Scanner(System.in);
         TaskList tasks = new TaskList();
 
-        ArrayList<String> savedLines = loadFromFile();
-        for (String line : savedLines) {
-            String[] parts = line.split(" \\| "); // type, done, desc
-            if (parts.length < 3) {
-                continue;
-            }
+        Storage storage = new Storage("./data/duke.txt");
 
-            String type = parts[0];
-            String done = parts[1];
-
-            Task t;
-
-            if (type.equals("T")) {
-                if (parts.length < 3) continue;
-                t = new Todo(parts[2]);
-
-            } else if (type.equals("D")) {
-                if (parts.length < 4) continue;
-                LocalDate byDate;
-                try {
-                    byDate = LocalDate.parse(parts[3].trim());
-                } catch (DateTimeParseException e) {
-                    continue;
-                }
-                t = new Deadline(parts[2], byDate);
-
-            } else if (type.equals("E")) {
-                if (parts.length < 5) continue;
-                t = new Event(parts[2], parts[3], parts[4]);
-
-            } else {
-                continue;
-            }
-
-            if (done.equals("1")) {
-                t.markDone();
-            }
+        ArrayList<Task> loadedTasks = storage.load();
+        for (Task t : loadedTasks) {
             tasks.add(t);
         }
+
         while (true) {
             try {
                 String userInput = scanner.nextLine();
@@ -83,6 +46,7 @@ public class Ace {
                     }
                     continue;
                 }
+
                 if (userInput.startsWith("delete ")) {
                     try {
                         int taskNumber = Integer.parseInt(userInput.substring(7));
@@ -93,7 +57,7 @@ public class Ace {
                         }
 
                         Task removedTask = tasks.delete(taskIndex);
-                        saveToFile(tasks.getTasks());
+                        storage.save(tasks.getTasks());
 
                         System.out.println("Noted. I've removed this task:");
                         System.out.println(removedTask);
@@ -108,7 +72,7 @@ public class Ace {
                 if (userInput.startsWith("todo ")) {
                     Task t = new Todo(userInput.substring(5));
                     tasks.add(t);
-                    saveToFile(tasks.getTasks());
+                    storage.save(tasks.getTasks());
                     System.out.println("Got it. I've added this task:");
                     System.out.println(t);
                     System.out.println("Now you have " + tasks.size() + " tasks in the list.");
@@ -130,9 +94,9 @@ public class Ace {
                         throw new AceException("Invalid date format. Use: yyyy-MM-dd");
                     }
 
-                    Task t = new Deadline(parts[0], byDate);
+                    Task t = new Deadline(description, byDate);
                     tasks.add(t);
-                    saveToFile(tasks.getTasks());
+                    storage.save(tasks.getTasks());
                     System.out.println("Got it. I've added this task:");
                     System.out.println(t);
                     System.out.println("Now you have " + tasks.size() + " tasks in the list.");
@@ -150,7 +114,7 @@ public class Ace {
 
                     Task t = new Event(description, from, to);
                     tasks.add(t);
-                    saveToFile(tasks.getTasks());
+                    storage.save(tasks.getTasks());
                     System.out.println("Got it. I've added this task:");
                     System.out.println(t);
                     System.out.println("Now you have " + tasks.size() + " tasks in the list.");
@@ -167,7 +131,7 @@ public class Ace {
                         }
 
                         tasks.get(taskIndex).markDone();
-                        saveToFile(tasks.getTasks());
+                        storage.save(tasks.getTasks());
                         System.out.println("Nice! I've marked this task as done:");
                         System.out.println(tasks.get(taskIndex));
 
@@ -187,7 +151,7 @@ public class Ace {
                         }
 
                         tasks.get(taskIndex).markNotDone();
-                        saveToFile(tasks.getTasks());
+                        storage.save(tasks.getTasks());
                         System.out.println("OK, I've marked this task as not done yet:");
                         System.out.println(tasks.get(taskIndex));
                     } catch (NumberFormatException e) {
@@ -202,47 +166,5 @@ public class Ace {
                 System.out.println("Oops! " + e.getMessage());
             }
         }
-    }
-
-    private static void saveToFile(ArrayList<Task> list) {
-        try {
-            Path p = Paths.get("./data/duke.txt");
-
-            ArrayList<String> lines = new ArrayList<>();
-            for (Task t : list) {
-                String done = t.isDone() ? "1" : "0";
-
-                if (t instanceof Todo) {
-                    lines.add("T | " + done + " | " + t.getDescription());
-
-                } else if (t instanceof Deadline) {
-                    Deadline d = (Deadline) t;
-                    lines.add("D | " + done + " | " + d.getDescription() + " | " + d.getBy());
-
-                } else if (t instanceof Event) {
-                    Event e = (Event) t;
-                    lines.add("E | " + done + " | " + e.getDescription()
-                            + " | " + e.getFrom() + " | " + e.getTo());
-                }
-            }
-
-            Files.write(p, lines, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            System.out.println("Failed to save to ./data/duke.txt");
-        }
-    }
-
-    private static ArrayList<String> loadFromFile() {
-        ArrayList<String> lines = new ArrayList<>();
-        try {
-            Path p = Paths.get("./data/duke.txt");
-            if (!Files.exists(p)) {
-                return lines; // first run: no file
-            }
-            lines.addAll(Files.readAllLines(p, StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            System.out.println("Failed to load from ./data/duke.txt");
-        }
-        return lines;
     }
 }

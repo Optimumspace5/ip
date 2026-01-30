@@ -1,5 +1,2 @@
-T | 0 | read book
-E | 1 | meeting | Mon | Tue
+T | 1 | read book
 T | 0 | wash car
-D | 0 | pay bills | 2020-01-02
-E | 0 | cs2103 | Wed | Fri
