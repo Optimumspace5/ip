@@ -18,8 +18,21 @@ import ace.AceException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
+/**
+ * Parses raw user input strings into executable {@link ace.command.Command} objects.
+ * Responsible for validating command formats and converting user-provided data into
+ * domain objects (e.g., tasks and indices).
+ */
 public class Parser {
 
+    /**
+     * Parses a user input line and returns the corresponding {@link Command}.
+     *
+     * @param userInput Raw user input.
+     * @param tasks Current task list (used for validating index-based commands).
+     * @return The parsed command to be executed.
+     * @throws AceException If the input is invalid or cannot be parsed into a known command.
+     */
     public static Command parse(String userInput, TaskList tasks) throws AceException {
         String input = userInput.trim();
 
@@ -67,6 +80,13 @@ public class Parser {
         throw new AceException("I don't know what that means.");
     }
 
+    /**
+     * Parses an add-task command (todo/deadline/event) into a {@link Task}.
+     *
+     * @param input Trimmed user input starting with "todo ", "deadline ", or "event ".
+     * @return The task represented by the input.
+     * @throws AceException If the add command format is invalid.
+     */
     private static Task parseAddCommand(String input) throws AceException {
         if (input.startsWith("todo ")) {
             String desc = input.substring(5).trim();
@@ -103,18 +123,51 @@ public class Parser {
         throw new AceException("I don't know what that means.");
     }
 
+    /**
+     * Extracts and validates the target index for a delete command.
+     *
+     * @param input User input starting with "delete ".
+     * @param tasks Current task list for bounds checking.
+     * @return Zero-based index of the task to delete.
+     * @throws AceException If the index is missing, not a number, or out of range.
+     */
     public static int parseDeleteIndex(String input, TaskList tasks) throws AceException {
         return parseIndex(input, "delete", tasks);
     }
 
+    /**
+     * Extracts and validates the target index for a mark command.
+     *
+     * @param input User input starting with "mark ".
+     * @param tasks Current task list for bounds checking.
+     * @return Zero-based index of the task to mark as done.
+     * @throws AceException If the index is missing, not a number, or out of range.
+     */
     public static int parseMarkIndex(String input, TaskList tasks) throws AceException {
         return parseIndex(input, "mark", tasks);
     }
 
+    /**
+     * Extracts and validates the target index for an unmark command.
+     *
+     * @param input User input starting with "unmark ".
+     * @param tasks Current task list for bounds checking.
+     * @return Zero-based index of the task to mark as not done.
+     * @throws AceException If the index is missing, not a number, or out of range.
+     */
     public static int parseUnmarkIndex(String input, TaskList tasks) throws AceException {
         return parseIndex(input, "unmark", tasks);
     }
 
+    /**
+     * Shared helper for parsing and validating indices for index-based commands.
+     *
+     * @param input User input line.
+     * @param commandWord The command word (e.g., "delete", "mark", "unmark").
+     * @param tasks Current task list for bounds checking.
+     * @return Zero-based validated index.
+     * @throws AceException If the command format is wrong, the index is invalid, or out of range.
+     */
     private static int parseIndex(String input, String commandWord, TaskList tasks) throws AceException {
         String prefix = commandWord + " ";
         if (!input.startsWith(prefix)) {
