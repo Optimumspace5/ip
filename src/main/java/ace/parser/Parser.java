@@ -7,6 +7,7 @@ import ace.command.ExitCommand;
 import ace.command.ListCommand;
 import ace.command.MarkCommand;
 import ace.command.UnmarkCommand;
+import ace.command.FindCommand;
 
 import ace.task.Task;
 import ace.task.Todo;
@@ -43,6 +44,18 @@ public class Parser {
 
         if (input.equals("list")) {
             return new ListCommand();
+        }
+
+        if (input.startsWith("find ")) {
+            String keyword = input.substring(5).trim();
+            if (keyword.isEmpty()) {
+                throw new AceException("The search keyword cannot be empty.");
+            }
+            return new FindCommand(keyword);
+        }
+
+        if (input.equals("find")) {
+            throw new AceException("The search keyword cannot be empty.");
         }
 
         if (input.startsWith("todo ")
