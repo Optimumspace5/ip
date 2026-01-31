@@ -1,3 +1,9 @@
+package ace.ui;
+
+import ace.AceException;
+import ace.task.Task;
+import ace.task.TaskList;
+
 import java.util.Scanner;
 
 public class Ui {
@@ -8,7 +14,7 @@ public class Ui {
     }
 
     public void showWelcome() {
-        System.out.println("Hello, I'm Ace.");
+        System.out.println("Hello, I'm ace.Ace.");
         System.out.println("What can i do for you?");
     }
 

@@ -1,4 +1,13 @@
+package ace;
+
 import java.util.ArrayList;
+import ace.command.Command;
+import ace.AceException;
+import ace.parser.Parser;
+import ace.storage.Storage;
+import ace.task.TaskList;
+import ace.ui.Ui;
+import ace.task.Task;
 
 public class Ace {
     public static void main(String[] args) {

@@ -1,3 +1,11 @@
+package ace.command;
+
+import ace.task.TaskList;
+import ace.ui.Ui;
+import ace.storage.Storage;
+
+import ace.AceException;
+
 public class MarkCommand extends Command {
     private final int index;
 

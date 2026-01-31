@@ -1,3 +1,10 @@
+package ace.storage;
+
+import ace.task.Deadline;
+import ace.task.Event;
+import ace.task.Task;
+import ace.task.Todo;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;

@@ -1,7 +1,15 @@
-public class DeleteCommand extends Command {
+package ace.command;
+
+import ace.task.TaskList;
+import ace.ui.Ui;
+import ace.storage.Storage;
+import ace.AceException;
+
+
+public class UnmarkCommand extends Command {
     private final int index;
 
-    public DeleteCommand(int index) {
+    public UnmarkCommand(int index) {
         this.index = index;
     }
 
@@ -10,8 +18,8 @@ public class DeleteCommand extends Command {
         if (index < 0 || index >= tasks.size()) {
             throw new AceException("Invalid task number.");
         }
-        Task removed = tasks.delete(index);
+        tasks.get(index).markNotDone();
         storage.save(tasks.getTasks());
-        ui.showDeleted(removed, tasks.size());
+        ui.showUnmarked(tasks.get(index));
     }
 }

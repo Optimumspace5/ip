@@ -1,3 +1,10 @@
+package ace.command;
+
+import ace.task.Task;
+import ace.task.TaskList;
+import ace.ui.Ui;
+import ace.storage.Storage;
+
 public class AddCommand extends Command {
     private final Task task;
 
