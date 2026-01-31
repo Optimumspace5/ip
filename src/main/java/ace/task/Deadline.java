@@ -11,6 +11,7 @@ public class Deadline extends Task {
         super(description);
         this.by = by;
     }
+
     public LocalDate getBy() {
         return by;
     }

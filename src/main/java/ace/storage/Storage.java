@@ -14,13 +14,30 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 
+/**
+ * Handles persistent storage of tasks to and from a local text file.
+ * Responsible for encoding tasks into strings for saving, and decoding
+ * saved strings back into {@link Task} objects when loading.
+ */
 public class Storage {
     private final Path path;
 
+    /**
+     * Creates a Storage object that reads from and writes to the given file path.
+     *
+     * @param filePath Relative or absolute path to the task storage file.
+     */
     public Storage(String filePath) {
         this.path = Paths.get(filePath);
     }
 
+    /**
+     * Loads tasks from the storage file.
+     * Each line in the file is decoded into a {@link Task} object.
+     *
+     * @return A list of tasks loaded from disk. Returns an empty list if the file
+     * does not exist or cannot be read.
+     */
     public ArrayList<Task> load() {
         ArrayList<Task> tasks = new ArrayList<>();
         if (!Files.exists(path)) {
@@ -42,6 +59,12 @@ public class Storage {
         return tasks;
     }
 
+    /**
+     * Saves the given list of tasks to the storage file.
+     * Tasks are encoded into strings before being written to disk.
+     *
+     * @param tasks The list of tasks to be saved.
+     */
     public void save(ArrayList<Task> tasks) {
         ArrayList<String> lines = new ArrayList<>();
         for (Task t : tasks) {
@@ -61,6 +84,13 @@ public class Storage {
         }
     }
 
+    /**
+     * Decodes a single line from the storage file into a {@link Task}.
+     * The line format is expected to follow the Duke encoding convention.
+     *
+     * @param line A single line read from the storage file.
+     * @return The decoded Task, or {@code null} if the line format is invalid.
+     */
     private Task decodeTask(String line) {
         String[] parts = line.split(" \\| ");
         if (parts.length < 3) {
@@ -98,6 +128,13 @@ public class Storage {
         return t;
     }
 
+    /**
+     * Encodes a {@link Task} into its string representation for storage.
+     *
+     * @param t The task to encode.
+     * @return The encoded string representation of the task, or an empty string
+     * if the task type is unsupported.
+     */
     private String encodeTask(Task t) {
         String done = t.isDone() ? "1" : "0";
 
