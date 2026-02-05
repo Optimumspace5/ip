@@ -3,30 +3,61 @@ package ace.ui;
 import ace.AceException;
 import ace.task.Task;
 import ace.task.TaskList;
+
 import java.util.ArrayList;
-
-import java.util.Scanner;
-
-/**
- * Handles all user interaction for the Ace application.
- * Responsible for reading user input and displaying messages to the user.
- */
-public class Ui {
+import java.util.Scanner;public class Ui {
     private final Scanner scanner;
+    private final boolean isGui;
+    private final StringBuilder output;
 
     /**
-     * Constructs a Ui object that reads input from standard input.
+     * Constructs a Ui object in CLI mode (reads from stdin, prints to stdout).
      */
     public Ui() {
-        this.scanner = new Scanner(System.in);
+        this(false);
+    }
+
+    /**
+     * Constructs a Ui object.
+     *
+     * @param isGui true => GUI mode (buffer output, no stdin)
+     */
+    public Ui(boolean isGui) {
+        this.isGui = isGui;
+        this.output = new StringBuilder();
+        this.scanner = isGui ? null : new Scanner(System.in);
+    }
+
+    private void println(String line) {
+        if (isGui) {
+            output.append(line).append(System.lineSeparator());
+        } else {
+            System.out.println(line);
+        }
+    }
+
+    /**
+     * Returns buffered output (GUI mode). Does not clear it.
+     */
+    public String getOutput() {
+        return output.toString();
+    }
+
+    /**
+     * Returns buffered output and clears it (GUI mode).
+     */
+    public String consumeOutput() {
+        String s = output.toString();
+        output.setLength(0);
+        return s;
     }
 
     /**
      * Displays the welcome message when the application starts.
      */
     public void showWelcome() {
-        System.out.println("Hello, I'm ace.Ace.");
-        System.out.println("What can i do for you?");
+        println("Hello, I'm ace.Ace.");
+        println("What can i do for you?");
     }
 
     /**
@@ -35,6 +66,9 @@ public class Ui {
      * @return The command entered by the user.
      */
     public String readCommand() {
+        if (isGui) {
+            throw new IllegalStateException("readCommand() should not be used in GUI mode.");
+        }
         return scanner.nextLine();
     }
 
@@ -42,7 +76,7 @@ public class Ui {
      * Displays the farewell message before the application exits.
      */
     public void showBye() {
-        System.out.println("Bye, Hope to see you again soon!");
+        println("Bye, Hope to see you again soon!");
     }
 
     /**
@@ -51,7 +85,7 @@ public class Ui {
      * @param message Error message to be shown.
      */
     public void showError(String message) {
-        System.out.println("Oops! " + message);
+        println("Oops! " + message);
     }
 
     /**
@@ -61,9 +95,9 @@ public class Ui {
      * @throws AceException If an error occurs while accessing the task list.
      */
     public void showList(TaskList tasks) throws AceException {
-        System.out.println("Here are the tasks in your list:");
+        println("Here are the tasks in your list:");
         for (int i = 0; i < tasks.size(); i++) {
-            System.out.println((i + 1) + ". " + tasks.get(i));
+            println((i + 1) + ". " + tasks.get(i));
         }
     }
 
@@ -74,9 +108,9 @@ public class Ui {
      * @param size The updated size of the task list.
      */
     public void showAdded(Task task, int size) {
-        System.out.println("Got it. I've added this task:");
-        System.out.println(task);
-        System.out.println("Now you have " + size + " tasks in the list.");
+        println("Got it. I've added this task:");
+        println(task.toString());
+        println("Now you have " + size + " tasks in the list.");
     }
 
     /**
@@ -86,9 +120,9 @@ public class Ui {
      * @param size The updated size of the task list.
      */
     public void showDeleted(Task task, int size) {
-        System.out.println("Noted. I've removed this task:");
-        System.out.println(task);
-        System.out.println("Now you have " + size + " tasks in the list.");
+        println("Noted. I've removed this task:");
+        println(task.toString());
+        println("Now you have " + size + " tasks in the list.");
     }
 
     /**
@@ -97,8 +131,8 @@ public class Ui {
      * @param task The task that was marked.
      */
     public void showMarked(Task task) {
-        System.out.println("Nice! I've marked this task as done:");
-        System.out.println(task);
+        println("Nice! I've marked this task as done:");
+        println(task.toString());
     }
 
     /**
@@ -107,14 +141,14 @@ public class Ui {
      * @param task The task that was unmarked.
      */
     public void showUnmarked(Task task) {
-        System.out.println("OK, I've marked this task as not done yet:");
-        System.out.println(task);
+        println("OK, I've marked this task as not done yet:");
+        println(task.toString());
     }
 
     public void showFindResults(ArrayList<Task> matches) {
-        System.out.println("Here are the matching tasks in your list:");
+        println("Here are the matching tasks in your list:");
         for (int i = 0; i < matches.size(); i++) {
-            System.out.println((i + 1) + "." + matches.get(i));
+            println((i + 1) + ". " + matches.get(i));
         }
     }
 }

@@ -2,6 +2,8 @@ package ace;
 
 import java.util.ArrayList;
 
+import java.util.ArrayList;
+
 import ace.command.Command;
 import ace.parser.Parser;
 import ace.storage.Storage;
@@ -45,26 +47,35 @@ public class Ace {
     }
 
     /**
-     * Temporary GUI-facing method for JavaFX Part 3.
-     * IMPORTANT: This does NOT yet execute real commands (because current commands
-     * print via Ui). It just returns a placeholder string so GUI wiring works.
+     * GUI-facing method.
+     * Takes user input, executes the real command logic, and returns the response text for display in GUI.
      *
      * @param input user input
-     * @return bot response text
+     * @return bot response text (possibly multi-line)
      */
     public String getResponse(String input) {
+        Ui guiUi = new Ui(true); // GUI mode: buffer output instead of printing
+
         String trimmed = input == null ? "" : input.trim();
         if (trimmed.isEmpty()) {
             return "";
         }
-        return "Ace heard: " + trimmed;
+
+        try {
+            Command command = Parser.parse(trimmed, tasks);
+            command.execute(tasks, guiUi, storage);
+        } catch (AceException e) {
+            guiUi.showError(e.getMessage());
+        }
+
+        return guiUi.consumeOutput().trim();
     }
 
     /**
      * CLI entry point (kept working).
      */
     public static void main(String[] args) {
-        Ui ui = new Ui();
+        Ui ui = new Ui();      // CLI mode (prints)
         Ace ace = new Ace();
 
         ui.showWelcome();
