@@ -2,8 +2,6 @@ package ace;
 
 import java.util.ArrayList;
 
-import java.util.ArrayList;
-
 import ace.command.Command;
 import ace.parser.Parser;
 import ace.storage.Storage;

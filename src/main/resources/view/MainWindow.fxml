@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
+<!-- a clickable button that can trigger actions--> 
 <?import javafx.scene.control.Button?>
+<!-- A container that adds scrollbars so content can scroll if it’s bigger than the visible area.--> 
 <?import javafx.scene.control.ScrollPane?>
+<!-- A single-line text output--> 
 <?import javafx.scene.control.TextField?>
+<!-- A layout container that lets you “anchor” children to the top/bottom/left/right edges.--> 
 <?import javafx.scene.layout.AnchorPane?>
+<!-- A layout container that stacks children vertically (top to bottom) -->
 <?import javafx.scene.layout.VBox?>
 
 <AnchorPane prefHeight="600.0" prefWidth="400.0"

@@ -1,12 +1,2 @@
-D | 0 | return book | 2019-10-15
-T | 0 | a
-D | 0 | b | 2019-10-15
-E | 0 | c | Mon | Tue
-T | 0 | test
-D | 0 | test | 2025-12-31
-E | 0 | test | a | b
-T | 0 | read book
-D | 0 | return book | 2024-06-06
-T | 0 | read book
-D | 0 | return book | 2024-06-06
-T | 0 | tak1
+T | 1 | test
+E | 0 | meeting | 2026-02-06 | 2026-02-07
