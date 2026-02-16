@@ -35,12 +35,20 @@ public class Parser {
     private static final String CMD_MARK = "mark";
     private static final String CMD_UNMARK = "unmark";
 
+    // C-FriendlierSyntax aliases
+    private static final String ALIAS_LIST = "ls";
+    private static final String ALIAS_TODO = "t";
+    private static final String ALIAS_DELETE = "rm";
+    private static final String ALIAS_MARK = "mk";
+    private static final String ALIAS_UNMARK = "um";
+
     private static final String ERR_UNKNOWN = "I don't know what that means.";
     private static final String ERR_INVALID_TASK_NO = "Invalid task number.";
     private static final String ERR_FIND_EMPTY = "The search keyword cannot be empty.";
     private static final String ERR_DEADLINE_FORMAT = "Invalid deadline format. Use: deadline <desc> /by <time>";
     private static final String ERR_EVENT_FORMAT = "Invalid event format. Use: event <desc> /from <start> /to <end>";
     private static final String ERR_TODO_EMPTY = "The description of a todo cannot be empty.";
+    private static final String ERR_EMPTY_INPUT = "Please enter a command.";
 
     /**
      * Parses a user input line and returns the corresponding {@link Command}.
@@ -55,12 +63,15 @@ public class Parser {
         assert tasks != null : "tasks should not be null";
 
         String input = userInput.trim();
+        if (input.isEmpty()) {
+            throw new AceException(ERR_EMPTY_INPUT);
+        }
 
         if (input.equals(CMD_BYE)) {
             return new ExitCommand();
         }
 
-        if (input.equals(CMD_LIST)) {
+        if (input.equals(CMD_LIST) || input.equals(ALIAS_LIST)) {
             return new ListCommand();
         }
 
@@ -69,23 +80,24 @@ public class Parser {
         }
 
         if (input.startsWith(CMD_TODO + " ")
+                || input.startsWith(ALIAS_TODO + " ")
                 || input.startsWith(CMD_DEADLINE + " ")
                 || input.startsWith(CMD_EVENT + " ")) {
             Task taskToAdd = parseAddCommand(input);
             return new AddCommand(taskToAdd);
         }
 
-        if (input.startsWith(CMD_DELETE + " ")) {
+        if (input.startsWith(CMD_DELETE + " ") || input.startsWith(ALIAS_DELETE + " ")) {
             int index = parseDeleteIndex(input, tasks);
             return new DeleteCommand(index);
         }
 
-        if (input.startsWith(CMD_MARK + " ")) {
+        if (input.startsWith(CMD_MARK + " ") || input.startsWith(ALIAS_MARK + " ")) {
             int index = parseMarkIndex(input, tasks);
             return new MarkCommand(index);
         }
 
-        if (input.startsWith(CMD_UNMARK + " ")) {
+        if (input.startsWith(CMD_UNMARK + " ") || input.startsWith(ALIAS_UNMARK + " ")) {
             int index = parseUnmarkIndex(input, tasks);
             return new UnmarkCommand(index);
         }
@@ -98,13 +110,15 @@ public class Parser {
     /**
      * Parses an add-task command (todo/deadline/event) into a {@link Task}.
      *
-     * @param input Trimmed user input starting with "todo ", "deadline ", or "event ".
+     * @param input Trimmed user input starting with "todo ", "t ", "deadline ", or "event ".
      * @return The task represented by the input.
      * @throws AceException If the add command format is invalid.
      */
     private static Task parseAddCommand(String input) throws AceException {
-        if (input.startsWith(CMD_TODO + " ")) {
-            String desc = input.substring(5).trim();
+        if (input.startsWith(CMD_TODO + " ") || input.startsWith(ALIAS_TODO + " ")) {
+            String desc = input.startsWith(CMD_TODO + " ")
+                    ? input.substring((CMD_TODO + " ").length()).trim()
+                    : input.substring((ALIAS_TODO + " ").length()).trim();
             if (desc.isEmpty()) {
                 throw new AceException(ERR_TODO_EMPTY);
             }
@@ -112,7 +126,7 @@ public class Parser {
         }
 
         if (input.startsWith(CMD_DEADLINE + " ")) {
-            String[] parts = input.substring(9).split(" /by ", 2);
+            String[] parts = input.substring((CMD_DEADLINE + " ").length()).split(" /by ", 2);
             if (parts.length < 2 || parts[0].trim().isEmpty()) {
                 throw new AceException(ERR_DEADLINE_FORMAT);
             }
@@ -128,8 +142,11 @@ public class Parser {
         }
 
         if (input.startsWith(CMD_EVENT + " ")) {
-            String[] parts = input.substring(6).split(" /from | /to ");
-            if (parts.length < 3 || parts[0].trim().isEmpty()) {
+            String[] parts = input.substring((CMD_EVENT + " ").length()).split(" /from | /to ");
+            if (parts.length < 3
+                    || parts[0].trim().isEmpty()
+                    || parts[1].trim().isEmpty()
+                    || parts[2].trim().isEmpty()) {
                 throw new AceException(ERR_EVENT_FORMAT);
             }
             return new Event(parts[0].trim(), parts[1].trim(), parts[2].trim());
@@ -151,7 +168,7 @@ public class Parser {
     }
 
     private static void validateBareAddCommand(String input) throws AceException {
-        if (input.equals(CMD_TODO)) {
+        if (input.equals(CMD_TODO) || input.equals(ALIAS_TODO)) {
             throw new AceException(ERR_TODO_EMPTY);
         }
         if (input.equals(CMD_DEADLINE)) {
@@ -164,59 +181,45 @@ public class Parser {
 
     /**
      * Extracts and validates the target index for a delete command.
-     *
-     * @param input User input starting with "delete ".
-     * @param tasks Current task list for bounds checking.
-     * @return Zero-based index of the task to delete.
-     * @throws AceException If the index is missing, not a number, or out of range.
      */
     public static int parseDeleteIndex(String input, TaskList tasks) throws AceException {
-        return parseIndex(input, CMD_DELETE, tasks);
+        return parseIndex(input, tasks, CMD_DELETE, ALIAS_DELETE);
     }
 
     /**
      * Extracts and validates the target index for a mark command.
-     *
-     * @param input User input starting with "mark ".
-     * @param tasks Current task list for bounds checking.
-     * @return Zero-based index of the task to mark as done.
-     * @throws AceException If the index is missing, not a number, or out of range.
      */
     public static int parseMarkIndex(String input, TaskList tasks) throws AceException {
-        return parseIndex(input, CMD_MARK, tasks);
+        return parseIndex(input, tasks, CMD_MARK, ALIAS_MARK);
     }
 
     /**
      * Extracts and validates the target index for an unmark command.
-     *
-     * @param input User input starting with "unmark ".
-     * @param tasks Current task list for bounds checking.
-     * @return Zero-based index of the task to mark as not done.
-     * @throws AceException If the index is missing, not a number, or out of range.
      */
     public static int parseUnmarkIndex(String input, TaskList tasks) throws AceException {
-        return parseIndex(input, CMD_UNMARK, tasks);
+        return parseIndex(input, tasks, CMD_UNMARK, ALIAS_UNMARK);
     }
 
     /**
      * Shared helper for parsing and validating indices for index-based commands.
-     *
-     * @param input       User input line.
-     * @param commandWord The command word (e.g., "delete", "mark", "unmark").
-     * @param tasks       Current task list for bounds checking.
-     * @return Zero-based validated index.
-     * @throws AceException If the command format is wrong, the index is invalid, or out of range.
      */
-    private static int parseIndex(String input, String commandWord, TaskList tasks) throws AceException {
-        assert commandWord != null && !commandWord.isBlank() : "commandWord must not be blank";
+    private static int parseIndex(String input, TaskList tasks, String... commandWords) throws AceException {
         assert tasks != null : "tasks should not be null";
+        assert commandWords != null && commandWords.length > 0 : "commandWords must not be empty";
 
-        String prefix = commandWord + " ";
-        if (!input.startsWith(prefix)) {
-            throw new AceException(ERR_UNKNOWN);
+        String numberPart = null;
+        for (String commandWord : commandWords) {
+            assert commandWord != null && !commandWord.isBlank() : "commandWord must not be blank";
+            String prefix = commandWord + " ";
+            if (input.startsWith(prefix)) {
+                numberPart = input.substring(prefix.length()).trim();
+                break;
+            }
         }
 
-        String numberPart = input.substring(prefix.length()).trim();
+        if (numberPart == null) {
+            throw new AceException(ERR_UNKNOWN);
+        }
 
         int taskNumber;
         try {
