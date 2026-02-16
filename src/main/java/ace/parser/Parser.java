@@ -36,6 +36,9 @@ public class Parser {
      * @throws AceException If the input is invalid or cannot be parsed into a known command.
      */
     public static Command parse(String userInput, TaskList tasks) throws AceException {
+        assert userInput != null : "userInput should not be null";
+        assert tasks != null : "tasks should not be null";
+        
         String input = userInput.trim();
 
         if (input.equals("bye")) {
@@ -183,6 +186,9 @@ public class Parser {
      * @throws AceException If the command format is wrong, the index is invalid, or out of range.
      */
     private static int parseIndex(String input, String commandWord, TaskList tasks) throws AceException {
+        assert commandWord != null && !commandWord.isBlank() : "commandWord must not be blank";
+        assert tasks != null : "tasks should not be null";
+        
         String prefix = commandWord + " ";
         if (!input.startsWith(prefix)) {
             throw new AceException("I don't know what that means.");
