@@ -1,21 +1,19 @@
 package ace.parser;
 
-import ace.command.AddCommand;      // if you create commands inside parser
+import ace.AceException;
+import ace.command.AddCommand;
 import ace.command.Command;
 import ace.command.DeleteCommand;
 import ace.command.ExitCommand;
+import ace.command.FindCommand;
 import ace.command.ListCommand;
 import ace.command.MarkCommand;
 import ace.command.UnmarkCommand;
-import ace.command.FindCommand;
-
-import ace.task.Task;
-import ace.task.Todo;
 import ace.task.Deadline;
 import ace.task.Event;
+import ace.task.Task;
 import ace.task.TaskList;
-
-import ace.AceException;
+import ace.task.Todo;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -26,6 +24,23 @@ import java.time.format.DateTimeParseException;
  * domain objects (e.g., tasks and indices).
  */
 public class Parser {
+
+    private static final String CMD_BYE = "bye";
+    private static final String CMD_LIST = "list";
+    private static final String CMD_FIND = "find";
+    private static final String CMD_TODO = "todo";
+    private static final String CMD_DEADLINE = "deadline";
+    private static final String CMD_EVENT = "event";
+    private static final String CMD_DELETE = "delete";
+    private static final String CMD_MARK = "mark";
+    private static final String CMD_UNMARK = "unmark";
+
+    private static final String ERR_UNKNOWN = "I don't know what that means.";
+    private static final String ERR_INVALID_TASK_NO = "Invalid task number.";
+    private static final String ERR_FIND_EMPTY = "The search keyword cannot be empty.";
+    private static final String ERR_DEADLINE_FORMAT = "Invalid deadline format. Use: deadline <desc> /by <time>";
+    private static final String ERR_EVENT_FORMAT = "Invalid event format. Use: event <desc> /from <start> /to <end>";
+    private static final String ERR_TODO_EMPTY = "The description of a todo cannot be empty.";
 
     /**
      * Parses a user input line and returns the corresponding {@link Command}.
@@ -38,63 +53,46 @@ public class Parser {
     public static Command parse(String userInput, TaskList tasks) throws AceException {
         assert userInput != null : "userInput should not be null";
         assert tasks != null : "tasks should not be null";
-        
+
         String input = userInput.trim();
 
-        if (input.equals("bye")) {
+        if (input.equals(CMD_BYE)) {
             return new ExitCommand();
         }
 
-        if (input.equals("list")) {
+        if (input.equals(CMD_LIST)) {
             return new ListCommand();
         }
 
-        if (input.startsWith("find ")) {
-            String keyword = input.substring(5).trim();
-            if (keyword.isEmpty()) {
-                throw new AceException("The search keyword cannot be empty.");
-            }
-            return new FindCommand(keyword);
+        if (input.startsWith(CMD_FIND + " ") || input.equals(CMD_FIND)) {
+            return parseFindCommand(input);
         }
 
-        if (input.equals("find")) {
-            throw new AceException("The search keyword cannot be empty.");
-        }
-
-        if (input.startsWith("todo ")
-                || input.startsWith("deadline ")
-                || input.startsWith("event ")) {
+        if (input.startsWith(CMD_TODO + " ")
+                || input.startsWith(CMD_DEADLINE + " ")
+                || input.startsWith(CMD_EVENT + " ")) {
             Task taskToAdd = parseAddCommand(input);
             return new AddCommand(taskToAdd);
         }
 
-        if (input.startsWith("delete ")) {
+        if (input.startsWith(CMD_DELETE + " ")) {
             int index = parseDeleteIndex(input, tasks);
             return new DeleteCommand(index);
         }
 
-        if (input.startsWith("mark ")) {
+        if (input.startsWith(CMD_MARK + " ")) {
             int index = parseMarkIndex(input, tasks);
             return new MarkCommand(index);
         }
 
-        if (input.startsWith("unmark ")) {
+        if (input.startsWith(CMD_UNMARK + " ")) {
             int index = parseUnmarkIndex(input, tasks);
             return new UnmarkCommand(index);
         }
 
-        // handles bare "todo", "deadline", "event" and anything unknown
-        if (input.equals("todo")) {
-            throw new AceException("The description of a todo cannot be empty.");
-        }
-        if (input.equals("deadline")) {
-            throw new AceException("Invalid deadline format. Use: deadline <desc> /by <time>");
-        }
-        if (input.equals("event")) {
-            throw new AceException("Invalid event format. Use: event <desc> /from <start> /to <end>");
-        }
+        validateBareAddCommand(input);
 
-        throw new AceException("I don't know what that means.");
+        throw new AceException(ERR_UNKNOWN);
     }
 
     /**
@@ -105,18 +103,18 @@ public class Parser {
      * @throws AceException If the add command format is invalid.
      */
     private static Task parseAddCommand(String input) throws AceException {
-        if (input.startsWith("todo ")) {
+        if (input.startsWith(CMD_TODO + " ")) {
             String desc = input.substring(5).trim();
             if (desc.isEmpty()) {
-                throw new AceException("The description of a todo cannot be empty.");
+                throw new AceException(ERR_TODO_EMPTY);
             }
             return new Todo(desc);
         }
 
-        if (input.startsWith("deadline ")) {
+        if (input.startsWith(CMD_DEADLINE + " ")) {
             String[] parts = input.substring(9).split(" /by ", 2);
             if (parts.length < 2 || parts[0].trim().isEmpty()) {
-                throw new AceException("Invalid deadline format. Use: deadline <desc> /by <time>");
+                throw new AceException(ERR_DEADLINE_FORMAT);
             }
 
             LocalDate by;
@@ -129,15 +127,39 @@ public class Parser {
             return new Deadline(parts[0].trim(), by);
         }
 
-        if (input.startsWith("event ")) {
+        if (input.startsWith(CMD_EVENT + " ")) {
             String[] parts = input.substring(6).split(" /from | /to ");
             if (parts.length < 3 || parts[0].trim().isEmpty()) {
-                throw new AceException("Invalid event format. Use: event <desc> /from <start> /to <end>");
+                throw new AceException(ERR_EVENT_FORMAT);
             }
             return new Event(parts[0].trim(), parts[1].trim(), parts[2].trim());
         }
 
-        throw new AceException("I don't know what that means.");
+        throw new AceException(ERR_UNKNOWN);
+    }
+
+    private static Command parseFindCommand(String input) throws AceException {
+        if (input.equals(CMD_FIND)) {
+            throw new AceException(ERR_FIND_EMPTY);
+        }
+
+        String keyword = input.substring((CMD_FIND + " ").length()).trim();
+        if (keyword.isEmpty()) {
+            throw new AceException(ERR_FIND_EMPTY);
+        }
+        return new FindCommand(keyword);
+    }
+
+    private static void validateBareAddCommand(String input) throws AceException {
+        if (input.equals(CMD_TODO)) {
+            throw new AceException(ERR_TODO_EMPTY);
+        }
+        if (input.equals(CMD_DEADLINE)) {
+            throw new AceException(ERR_DEADLINE_FORMAT);
+        }
+        if (input.equals(CMD_EVENT)) {
+            throw new AceException(ERR_EVENT_FORMAT);
+        }
     }
 
     /**
@@ -149,7 +171,7 @@ public class Parser {
      * @throws AceException If the index is missing, not a number, or out of range.
      */
     public static int parseDeleteIndex(String input, TaskList tasks) throws AceException {
-        return parseIndex(input, "delete", tasks);
+        return parseIndex(input, CMD_DELETE, tasks);
     }
 
     /**
@@ -161,7 +183,7 @@ public class Parser {
      * @throws AceException If the index is missing, not a number, or out of range.
      */
     public static int parseMarkIndex(String input, TaskList tasks) throws AceException {
-        return parseIndex(input, "mark", tasks);
+        return parseIndex(input, CMD_MARK, tasks);
     }
 
     /**
@@ -173,7 +195,7 @@ public class Parser {
      * @throws AceException If the index is missing, not a number, or out of range.
      */
     public static int parseUnmarkIndex(String input, TaskList tasks) throws AceException {
-        return parseIndex(input, "unmark", tasks);
+        return parseIndex(input, CMD_UNMARK, tasks);
     }
 
     /**
@@ -188,10 +210,10 @@ public class Parser {
     private static int parseIndex(String input, String commandWord, TaskList tasks) throws AceException {
         assert commandWord != null && !commandWord.isBlank() : "commandWord must not be blank";
         assert tasks != null : "tasks should not be null";
-        
+
         String prefix = commandWord + " ";
         if (!input.startsWith(prefix)) {
-            throw new AceException("I don't know what that means.");
+            throw new AceException(ERR_UNKNOWN);
         }
 
         String numberPart = input.substring(prefix.length()).trim();
@@ -200,12 +222,12 @@ public class Parser {
         try {
             taskNumber = Integer.parseInt(numberPart);
         } catch (NumberFormatException e) {
-            throw new AceException("Invalid task number.");
+            throw new AceException(ERR_INVALID_TASK_NO);
         }
 
         int index = taskNumber - 1;
         if (index < 0 || index >= tasks.size()) {
-            throw new AceException("Invalid task number.");
+            throw new AceException(ERR_INVALID_TASK_NO);
         }
 
         return index;
