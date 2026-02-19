@@ -4,8 +4,10 @@ import ace.AceException;
 import ace.storage.Storage;
 import ace.task.TaskList;
 import ace.ui.Ui;
-import ace.AceException;
 
+/**
+ * Displays all current tasks in their stored order.
+ */
 public class ListCommand extends Command {
 
     @Override

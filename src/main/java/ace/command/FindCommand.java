@@ -6,7 +6,9 @@ import ace.task.TaskList;
 import ace.ui.Ui;
 
 import java.util.ArrayList;
-
+/**
+ * Finds tasks whose descriptions match the provided keyword.
+ */
 public class FindCommand extends Command {
     private final String keyword;
 
