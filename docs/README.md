@@ -1,30 +1,93 @@
-# ace.Ace User Guide
+# Ace User Guide
 
-// Update the title above to match the actual product name
+Ace is a desktop task manager that helps you manage todos, deadlines, and events using simple commands.
 
-// Product screenshot goes here
+![Ui](Ui.png)
 
-// Product intro goes here
+## Quick Start
 
-## Adding deadlines
+1. Launch the app.
+2. Type a command in the input box.
+3. Press `Send`.
 
-// Describe the action and its outcome.
+## Features
 
-// Give examples of usage
+### Add a todo
 
-Example: `keyword (optional arguments)`
+Adds a todo task.
 
-// A description of the expected outcome goes here
+Format: `todo <description>`  
+Alias: `t <description>`
 
-```
-expected output
-```
+Example:
+- `todo review CS2103 notes`
 
-## Feature ABC
+### Add a deadline
 
-// Feature details
+Adds a task with a due date.
 
+Format: `deadline <description> /by <yyyy-MM-dd>`
 
-## Feature XYZ
+Example:
+- `deadline submit iP draft /by 2026-02-25`
 
-// Feature details
+### Add an event
+
+Adds a task with a start and end time.
+
+Format: `event <description> /from <start> /to <end>`
+
+Example:
+- `event project consultation /from 3pm /to 4pm`
+
+### List tasks
+
+Shows all tasks.
+
+Format: `list`  
+Alias: `ls`
+
+### Mark task as done
+
+Marks a task as completed.
+
+Format: `mark <task number>`  
+Alias: `mk <task number>`
+
+Example:
+- `mark 2`
+
+### Unmark task
+
+Marks a task as not completed.
+
+Format: `unmark <task number>`  
+Alias: `um <task number>`
+
+Example:
+- `unmark 2`
+
+### Delete task
+
+Deletes a task by number.
+
+Format: `delete <task number>`  
+Alias: `rm <task number>`
+
+Example:
+- `delete 1`
+
+### Find tasks
+
+Finds tasks containing a keyword.
+
+Format: `find <keyword>`
+
+Example:
+- `find project`
+
+### Exit
+
+Closes the app.
+
+Format: `bye`
