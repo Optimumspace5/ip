@@ -23,7 +23,8 @@ Ace is a desktop task manager for quickly managing `todo`, `deadline`, and `even
 | Find tasks | `find <keyword>` | - | `find project` |
 | Exit app | `bye` | - | `bye` |
 
-## Example Session
+
+### Example Session
 
 ```text
 todo read chapter 6

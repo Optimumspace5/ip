@@ -23,6 +23,16 @@ dependencies {
     implementation group: 'org.openjfx', name: 'javafx-graphics', version: javaFxVersion, classifier: 'win'
     implementation group: 'org.openjfx', name: 'javafx-graphics', version: javaFxVersion, classifier: 'mac'
     implementation group: 'org.openjfx', name: 'javafx-graphics', version: javaFxVersion, classifier: 'linux'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+}
+
+sourceSets {
+    test {
+        java {
+            srcDirs = ['test/java']
+        }
+    }
 }
 
 test {
@@ -48,6 +58,6 @@ shadowJar {
     archiveClassifier = null
 }
 
-run{
+run {
     standardInput = System.in
 }
