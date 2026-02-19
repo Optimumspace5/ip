@@ -87,6 +87,20 @@ public class ParserTest {
     }
 
     @Test
+    public void parseDeadline_withFlexibleWhitespace_returnsAddCommand() throws AceException {
+        TaskList tasks = new TaskList();
+
+        assertTrue(Parser.parse("deadline report   /by    2026-12-31", tasks) instanceof AddCommand);
+    }
+
+    @Test
+    public void parseEvent_withFlexibleWhitespace_returnsAddCommand() throws AceException {
+        TaskList tasks = new TaskList();
+
+        assertTrue(Parser.parse("event sprint demo   /from   2pm   /to   4pm", tasks) instanceof AddCommand);
+    }
+
+    @Test
     public void parse_listAlias_returnsListCommand() throws AceException {
         TaskList tasks = new TaskList();
 
