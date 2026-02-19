@@ -14,9 +14,15 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 
+/**
+ * Reusable chat bubble UI component loaded from DialogBox.fxml.
+ * Contains message text and speaker avatar.
+ */
 public class DialogBox extends HBox {
+    // Injected from DialogBox.fxml: label that shows the message text.
     @FXML
     private Label dialog;
+    // Injected from DialogBox.fxml: avatar image shown beside the message.
     @FXML
     private ImageView displayPicture;
 
@@ -34,6 +40,9 @@ public class DialogBox extends HBox {
         displayPicture.setImage(img);
     }
 
+    /**
+     * Mirrors the dialog so avatar/text order is swapped for bot messages.
+     */
     private void flip() {
         ObservableList<Node> tmp = FXCollections.observableArrayList(getChildren());
         Collections.reverse(tmp);
@@ -41,10 +50,16 @@ public class DialogBox extends HBox {
         setAlignment(Pos.TOP_LEFT);
     }
 
+    /**
+     * Creates a right-aligned user dialog (default layout).
+     */
     public static DialogBox getUserDialog(String text, Image img) {
         return new DialogBox(text, img);
     }
 
+    /**
+     * Creates a left-aligned bot dialog by flipping node order.
+     */
     public static DialogBox getBotDialog(String text, Image img) {
         DialogBox db = new DialogBox(text, img);
         db.flip();

@@ -5,7 +5,9 @@ import ace.ui.Ui;
 import ace.storage.Storage;
 
 import ace.AceException;
-
+/**
+ * Marks a task as done using its 0-based index in TaskList.
+ */
 public class MarkCommand extends Command {
     private final int index;
 

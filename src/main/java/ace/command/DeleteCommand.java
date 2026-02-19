@@ -6,7 +6,9 @@ import ace.ui.Ui;
 import ace.storage.Storage;
 
 import ace.AceException;
-
+/**
+ * Deletes a task by index and persists the updated task list.
+ */
 public class DeleteCommand extends Command {
     private final int index;
 
