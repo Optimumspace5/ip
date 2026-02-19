@@ -15,7 +15,7 @@ import ace.ui.Ui;
  */
 public class Ace {
 
-    private static final String DEFAULT_FILE_PATH = "./data/duke.txt";
+    private static final String DEFAULT_FILE_PATH = "./data/ace.txt";
 
     private final TaskList tasks;
     private final Storage storage;
