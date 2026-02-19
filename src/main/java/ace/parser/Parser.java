@@ -17,6 +17,8 @@ import ace.task.Todo;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Parses raw user input strings into executable {@link ace.command.Command} objects.
@@ -49,6 +51,9 @@ public class Parser {
     private static final String ERR_EVENT_FORMAT = "Invalid event format. Use: event <desc> /from <start> /to <end>";
     private static final String ERR_TODO_EMPTY = "The description of a todo cannot be empty.";
     private static final String ERR_EMPTY_INPUT = "Please enter a command.";
+
+    private static final Pattern DEADLINE_PATTERN = Pattern.compile("^(.+?)\\s+/by\\s+(.+)$");
+    private static final Pattern EVENT_PATTERN = Pattern.compile("^(.+?)\\s+/from\\s+(.+?)\\s+/to\\s+(.+)$");
 
     /**
      * Parses a user input line and returns the corresponding {@link Command}.
@@ -126,30 +131,43 @@ public class Parser {
         }
 
         if (input.startsWith(CMD_DEADLINE + " ")) {
-            String[] parts = input.substring((CMD_DEADLINE + " ").length()).split(" /by ", 2);
-            if (parts.length < 2 || parts[0].trim().isEmpty()) {
+            String content = input.substring((CMD_DEADLINE + " ").length()).trim();
+            Matcher matcher = DEADLINE_PATTERN.matcher(content);
+            if (!matcher.matches()) {
+                throw new AceException(ERR_DEADLINE_FORMAT);
+            }
+
+            String description = matcher.group(1).trim();
+            String byRaw = matcher.group(2).trim();
+            if (description.isEmpty() || byRaw.isEmpty()) {
                 throw new AceException(ERR_DEADLINE_FORMAT);
             }
 
             LocalDate by;
             try {
-                by = LocalDate.parse(parts[1].trim());
+                by = LocalDate.parse(byRaw);
             } catch (DateTimeParseException e) {
                 throw new AceException("Invalid date format. Use: yyyy-MM-dd");
             }
 
-            return new Deadline(parts[0].trim(), by);
+            return new Deadline(description, by);
         }
 
         if (input.startsWith(CMD_EVENT + " ")) {
-            String[] parts = input.substring((CMD_EVENT + " ").length()).split(" /from | /to ");
-            if (parts.length < 3
-                    || parts[0].trim().isEmpty()
-                    || parts[1].trim().isEmpty()
-                    || parts[2].trim().isEmpty()) {
+            String content = input.substring((CMD_EVENT + " ").length()).trim();
+            Matcher matcher = EVENT_PATTERN.matcher(content);
+            if (!matcher.matches()) {
                 throw new AceException(ERR_EVENT_FORMAT);
             }
-            return new Event(parts[0].trim(), parts[1].trim(), parts[2].trim());
+
+            String description = matcher.group(1).trim();
+            String from = matcher.group(2).trim();
+            String to = matcher.group(3).trim();
+            if (description.isEmpty() || from.isEmpty() || to.isEmpty()) {
+                throw new AceException(ERR_EVENT_FORMAT);
+            }
+
+            return new Event(description, from, to);
         }
 
         throw new AceException(ERR_UNKNOWN);
